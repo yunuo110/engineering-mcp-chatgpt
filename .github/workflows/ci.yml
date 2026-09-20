@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    name: Node 24 validation
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm audit --audit-level=low
+      - run: npm pack --dry-run
+
+  windows-powershell:
+    name: Windows PowerShell parser
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse PowerShell helpers
+        shell: powershell
+        run: |
+          $scripts = @(
+            'ops/Initialize-PrivateProfile.ps1'
+            'ops/Initialize-RemoteProfile.ps1'
+            'ops/Workspace-Access-Control.ps1'
+          )
+          $failed = $false
+          foreach ($script in $scripts) {
+            $tokens = $null
+            $parseErrors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path -LiteralPath $script),
+              [ref]$tokens,
+              [ref]$parseErrors
+            )
+            if ($parseErrors.Count -gt 0) {
+              $parseErrors | ForEach-Object { Write-Error "$script`: $($_.Message)" }
+              $failed = $true
+            }
+          }
+          if ($failed) {
+            throw 'PowerShell parser validation failed.'
+          }

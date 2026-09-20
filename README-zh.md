@@ -2,7 +2,7 @@
 
 这是 Engineering MCP 的**可选 companion sidecar plugin**。它提供面向 ChatGPT 的 MCP 入口、严格 C2C 转发和由本机操作员批准的 Workspace Access；它不修改、不内嵌 Engineering MCP core。
 
-本包要求 Engineering MCP 提供私有 C2C contract `engineering-c2c/1`，并通过操作员配置的 `engineering-mcp` executable 启动：
+本包要求 [Engineering MCP](https://github.com/yunuo110/engineering-mcp) 提供私有 [`engineering-c2c/1` contract](https://github.com/yunuo110/engineering-mcp/blob/main/docs/c2c-private-contract.md)；该 contract 现已正式进入 Core `main`。插件通过操作员配置的 `engineering-mcp` executable 启动：
 
 ```text
 engineering-mcp c2c-client --contract-version engineering-c2c/1 --repo <configured-repository>
@@ -10,7 +10,7 @@ engineering-mcp c2c-client --contract-version engineering-c2c/1 --repo <configur
 
 Core 私有进程通过 MCP stdio 只暴露 `execute_c2c_plan`；插件对 ChatGPT 只暴露 `engineering_execute_c2c_plan`。插件不复制 Core 实现。
 
-> 发布状态：`0.1.0`，已具备公开发布条件，未 push，未 publish。许可证为 Apache-2.0。
+> 发布状态：`0.1.0`，源码已公开于 GitHub，npm 未发布。许可证为 Apache-2.0。
 
 ## 兼容性
 
