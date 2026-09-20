@@ -1,0 +1,33 @@
+{
+  "request_workspace_access": {
+    "workspace_root": "C:\\EngineeringMCP\\example-workspace",
+    "permissions": [
+      "READ"
+    ],
+    "reason": "Review source files"
+  },
+  "get_workspace_access": {
+    "access_id": "req_00000000000000000000000000000000"
+  },
+  "list_workspace": {
+    "grant_id": "grant_00000000000000000000000000000000",
+    "relative_path": "",
+    "depth": 2
+  },
+  "read_workspace_file": {
+    "grant_id": "grant_00000000000000000000000000000000",
+    "relative_path": "README.md"
+  },
+  "search_workspace": {
+    "grant_id": "grant_00000000000000000000000000000000",
+    "query": "engineering_execute_c2c_plan",
+    "file_extension": ".md"
+  },
+  "write_workspace_file": {
+    "grant_id": "grant_00000000000000000000000000000000",
+    "relative_path": "notes.txt",
+    "operation": "create",
+    "content": "Example content"
+  }
+}
+

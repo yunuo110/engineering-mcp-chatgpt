@@ -1,0 +1,27 @@
+{
+  "profile": "remote-oauth",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8770,
+    "path": "/mcp"
+  },
+  "auth": {
+    "mode": "oauth",
+    "issuer": "https://id.example.com",
+    "audience": "https://mcp.example.com",
+    "resource": "https://mcp.example.com",
+    "jwksUri": "https://id.example.com/oauth/v2/keys",
+    "scopes": [
+      "engineering-mcp:execute"
+    ]
+  },
+  "core": {
+    "executable": "engineering-mcp",
+    "contractVersion": "engineering-c2c/1",
+    "repo": "C:\\EngineeringMCP\\workspace",
+    "timeoutMs": 45000
+  },
+  "workspaceAccess": {
+    "authzRoot": "C:\\ProgramData\\EngineeringMCPChatGPT\\authz"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "profile": "private",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8770,
+    "path": "/mcp"
+  },
+  "auth": {
+    "mode": "none"
+  },
+  "core": {
+    "executable": "engineering-mcp",
+    "contractVersion": "engineering-c2c/1",
+    "repo": "C:\\EngineeringMCP\\workspace",
+    "timeoutMs": 45000
+  },
+  "workspaceAccess": {
+    "authzRoot": "C:\\ProgramData\\EngineeringMCPChatGPT\\authz"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "engineering-mcp-chatgpt",
+  "version": "0.1.0",
+  "description": "Optional ChatGPT companion sidecar for Engineering MCP",
+  "type": "module",
+  "private": false,
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/server/entrypoint.mjs",
+    "./contract": "./src/core/contract.mjs",
+    "./workspace-access": "./src/core/workspace-access.mjs"
+  },
+  "bin": {
+    "engineering-mcp-chatgpt": "./src/server/entrypoint.mjs"
+  },
+  "files": [
+    "config",
+    "docs",
+    "examples",
+    "ops",
+    "src",
+    "LICENSE",
+    "README.md",
+    "README-zh.md",
+    "SECURITY.md"
+  ],
+  "scripts": {
+    "start": "node ./src/server/entrypoint.mjs",
+    "test": "node --test ./tests/*.test.mjs",
+    "typecheck": "node --check ./src/auth/config.mjs && node --check ./src/auth/oauth.mjs && node --check ./src/core/contract.mjs && node --check ./src/core/c2c-forwarding.mjs && node --check ./src/core/workspace-access.mjs && node --check ./src/server/app.mjs && node --check ./src/server/entrypoint.mjs",
+    "prepack": "npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "jose": "6.2.12",
+    "zod": "4.6.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
