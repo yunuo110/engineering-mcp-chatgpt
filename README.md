@@ -2,7 +2,7 @@
 
 An **optional companion sidecar plugin** for Engineering MCP. It adds a ChatGPT-facing MCP endpoint, strict C2C forwarding, and operator-approved Workspace Access without changing or embedding the Engineering MCP core.
 
-This package requires [Engineering MCP](https://github.com/yunuo110/engineering-mcp) with the private [`engineering-c2c/1` contract](https://github.com/yunuo110/engineering-mcp/blob/feat/private-c2c-contract-v1/docs/c2c-private-contract.md). The contract is in [Core PR #2](https://github.com/yunuo110/engineering-mcp/pull/2); use a Core release or branch containing it, and do not assume the current Core `main` already contains it. The companion invokes the operator-configured `engineering-mcp` executable as:
+This package requires [Engineering MCP](https://github.com/yunuo110/engineering-mcp) with the private [`engineering-c2c/1` contract](https://github.com/yunuo110/engineering-mcp/blob/main/docs/c2c-private-contract.md), which is now part of Core `main`. The companion invokes the operator-configured `engineering-mcp` executable as:
 
 ```text
 engineering-mcp c2c-client --contract-version engineering-c2c/1 --repo <configured-repository>
