@@ -27,11 +27,7 @@ jobs:
       - name: Parse PowerShell helpers
         shell: powershell
         run: |
-          $scripts = @(
-            'ops/Initialize-PrivateProfile.ps1'
-            'ops/Initialize-RemoteProfile.ps1'
-            'ops/Workspace-Access-Control.ps1'
-          )
+          $scripts = @(Get-ChildItem -LiteralPath 'ops' -File | Where-Object { $_.Extension -in @('.ps1', '.psm1') } | Select-Object -ExpandProperty FullName)
           $failed = $false
           foreach ($script in $scripts) {
             $tokens = $null

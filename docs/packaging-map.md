@@ -9,6 +9,7 @@
 - Private and Remote OAuth configuration validation
 - generic JWT/JWKS OAuth verification and protected-resource metadata
 - local operator Workspace Access control script
+- local operator menu, read-only notification watcher, and record-validation module
 - sanitized examples, documentation, and portable tests
 
 ## Rewritten for portability

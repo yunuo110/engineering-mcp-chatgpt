@@ -106,6 +106,8 @@ powershell -NoProfile -File .\ops\Workspace-Access-Control.ps1 -AuthzRoot 'C:\Pr
 
 The script demands a typed acknowledgement. Deny and Revoke use the same script. The script never changes the target workspace's NTFS ACL.
 
+For a local pending-request menu and console notification watcher, see [Operator Approval UX V1](docs/operator-approval-ux.md). The menu keeps the existing typed acknowledgement and supports both the companion configuration and the ingress `Get-Constants` boundary.
+
 ## Remote profile
 
 Start with `config/oauth.example.json` and [Remote OAuth](docs/remote-oauth.md). The Node server listens on a private address; an HTTPS reverse proxy publishes `https://mcp.example.com/mcp`. Provider values remain generic. ZITADEL is documented only as the tested reference provider.
