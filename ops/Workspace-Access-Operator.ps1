@@ -56,9 +56,9 @@ function Invoke-Decision([string]$Action,$Row,[int]$Hours=0) {
  if($Action -ceq 'Revoke'){
   if(@($latest.Grants | Where-Object {$_.grant_id -ceq $id -and $_.status -ceq 'GRANTED'}).Count -ne 1){throw 'GRANT_NOT_ACTIVE'}
  } elseif(@($latest.Requests | Where-Object {$_.request_id -ceq $id -and $_.status -ceq 'REQUESTED'}).Count -ne 1){throw 'REQUEST_ALREADY_DECIDED'}
- $arguments=Get-OperatorControlArguments $binding.Mode $Action $id $binding.Root $Hours
+ $parameters=Get-OperatorControlParameters $binding.Mode $Action $id $binding.Root $Hours
  Write-Host ('The control script will require its exact typed {0} acknowledgement.' -f $Action.ToUpperInvariant())
- & $binding.Control @arguments
+ & $binding.Control @parameters
 }
 function Read-Index([int]$Count) {
  $raw=Read-Host 'Select index'
