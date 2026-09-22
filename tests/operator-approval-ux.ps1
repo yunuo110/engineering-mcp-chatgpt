@@ -46,6 +46,11 @@ try{
  $grant.status='GRANTED';$grant.Remove('revoked_at');$grant.expires_at='2020-01-01T00:00:00.000Z'
  Write-Json $grantPath $grant
  Assert-Equal (Get-OperatorSnapshot $authz).Grants[0].status 'EXPIRED' 'expired classification'
+ $grant.expires_at=$null
+ Write-Json $grantPath $grant
+ Assert-Throws {Get-OperatorSnapshot $authz | Out-Null} 'null expiry fails closed'
+ $grant.expires_at='2020-01-01T00:00:00.000Z'
+ Write-Json $grantPath $grant
  Write-Output 'CHECKPOINT: lifecycle classification'
  [IO.File]::WriteAllText($requestPath,'{bad json')
  Assert-Throws {Get-OperatorSnapshot $authz | Out-Null} 'malformed JSON fails closed'

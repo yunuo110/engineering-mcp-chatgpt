@@ -90,10 +90,11 @@ function Get-OperatorSnapshot([string]$AuthzRoot) {
   Assert-OperatorRoot $r.canonical_root
   Assert-OperatorPermissions $r.permissions
   $null=Assert-OperatorDate $r.granted_at
-  if($r.PSObject.Properties.Name -ccontains 'expires_at' -and $null -ne $r.expires_at){$null=Assert-OperatorDate $r.expires_at}
+  if($r.PSObject.Properties.Name -ccontains 'expires_at'){$null=Assert-OperatorDate $r.expires_at}
   if($r.PSObject.Properties.Name -ccontains 'revoked_at'){$null=Assert-OperatorDate $r.revoked_at}
+  if($r.status -ceq 'REVOKED' -and $r.PSObject.Properties.Name -cnotcontains 'revoked_at'){throw 'AUTHZ_RECORD_INVALID'}
   $status=$r.status
-  if($status -ceq 'GRANTED' -and $r.PSObject.Properties.Name -ccontains 'expires_at' -and $null -ne $r.expires_at){
+  if($status -ceq 'GRANTED' -and $r.PSObject.Properties.Name -ccontains 'expires_at'){
    if((Assert-OperatorDate $r.expires_at) -le [datetimeoffset]::UtcNow){$status='EXPIRED'}
   }
   $grantById[$id]=$r
