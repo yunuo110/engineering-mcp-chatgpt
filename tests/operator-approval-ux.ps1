@@ -73,15 +73,87 @@ try{
  Assert-Equal (Resolve-OperatorExpiry '3') 24 'expiry 24h'
  Assert-Equal (Resolve-OperatorExpiry '4') 0 'expiry none'
  Assert-Throws {Resolve-OperatorExpiry '1;whoami' | Out-Null} 'expiry rejects command'
- $approve=Get-OperatorControlArguments Companion Approve $requestId $authz 8
- Assert-Equal ($approve -join '|') ('-AuthzRoot|'+$authz+'|-RequestId|'+$requestId+'|-Approve|-ExpiresInHours|8') 'companion approve fixed arguments'
- $ingress=Get-OperatorControlArguments Ingress Approve $requestId $authz 0
- Assert-Equal ($ingress -join '|') ('-RequestId|'+$requestId+'|-Approve') 'ingress approve fixed arguments'
- Assert-Equal ((Get-OperatorControlArguments Companion Deny $requestId $authz) -join '|') ('-AuthzRoot|'+$authz+'|-RequestId|'+$requestId+'|-Deny') 'deny fixed arguments'
- Assert-Equal ((Get-OperatorControlArguments Ingress Revoke $grantId $authz) -join '|') ('-GrantId|'+$grantId+'|-Revoke') 'revoke fixed arguments'
- Assert-Throws {Get-OperatorControlArguments Companion Approve 'req_abc;whoami' $authz 0 | Out-Null} 'id injection rejected'
- Assert-Throws {Get-OperatorControlArguments Companion Deny $requestId $authz 8 | Out-Null} 'deny expiry rejected'
- Write-Output 'CHECKPOINT: input and arguments'
+ $approve=Get-OperatorControlParameters Companion Approve $requestId $authz 8
+ Assert-Equal $approve.AuthzRoot $authz 'companion approve authz root'
+ Assert-Equal $approve.RequestId $requestId 'companion approve request id'
+ Assert-Equal $approve.Approve $true 'companion approve switch'
+ Assert-Equal $approve.ExpiresInHours 8 'companion approve expiry'
+ $ingress=Get-OperatorControlParameters Ingress Approve $requestId $authz 0
+ Assert-Equal $ingress.ContainsKey('AuthzRoot') $false 'ingress omits authz root'
+ Assert-Equal $ingress.RequestId $requestId 'ingress approve request id'
+ Assert-Equal $ingress.Approve $true 'ingress approve switch'
+ Assert-Equal $ingress.ContainsKey('ExpiresInHours') $false 'ingress no-expiry omitted'
+ $deny=Get-OperatorControlParameters Companion Deny $requestId $authz
+ Assert-Equal $deny.AuthzRoot $authz 'deny authz root'
+ Assert-Equal $deny.RequestId $requestId 'deny request id'
+ Assert-Equal $deny.Deny $true 'deny switch'
+ $revoke=Get-OperatorControlParameters Ingress Revoke $grantId $authz
+ Assert-Equal $revoke.GrantId $grantId 'revoke grant id'
+ Assert-Equal $revoke.Revoke $true 'revoke switch'
+ Assert-Throws {Get-OperatorControlParameters Companion Approve 'req_abc;whoami' $authz 0 | Out-Null} 'id injection rejected'
+ Assert-Throws {Get-OperatorControlParameters Companion Deny $requestId $authz 8 | Out-Null} 'deny expiry rejected'
+
+ $companionMock=Join-Path $base 'companion-control.ps1'
+ $ingressMock=Join-Path $base 'ingress-control.ps1'
+ @'
+param(
+ [string]$AuthzRoot,
+ [string]$RequestId,
+ [switch]$Approve,
+ [switch]$Deny,
+ [switch]$Revoke,
+ [string]$GrantId,
+ [int]$ExpiresInHours=0
+)
+[ordered]@{
+ AuthzRoot=$AuthzRoot;RequestId=$RequestId;Approve=[bool]$Approve;Deny=[bool]$Deny;
+ Revoke=[bool]$Revoke;GrantId=$GrantId;ExpiresInHours=$ExpiresInHours
+} | ConvertTo-Json -Compress
+'@ | Set-Content -LiteralPath $companionMock -Encoding UTF8
+ @'
+param(
+ [string]$RequestId,
+ [switch]$Approve,
+ [switch]$Deny,
+ [switch]$Revoke,
+ [string]$GrantId,
+ [int]$ExpiresInHours=0
+)
+[ordered]@{
+ RequestId=$RequestId;Approve=[bool]$Approve;Deny=[bool]$Deny;
+ Revoke=[bool]$Revoke;GrantId=$GrantId;ExpiresInHours=$ExpiresInHours
+} | ConvertTo-Json -Compress
+'@ | Set-Content -LiteralPath $ingressMock -Encoding UTF8
+
+ $params=Get-OperatorControlParameters Ingress Approve $requestId $authz 0
+ $bound=(& $ingressMock @params | ConvertFrom-Json)
+ Assert-Equal $bound.RequestId $requestId 'ingress binding approve request id'
+ Assert-Equal $bound.Approve $true 'ingress binding approve switch'
+ Assert-Equal $bound.ExpiresInHours 0 'ingress binding no expiry'
+
+ $params=Get-OperatorControlParameters Ingress Approve $requestId $authz 8
+ $bound=(& $ingressMock @params | ConvertFrom-Json)
+ Assert-Equal $bound.RequestId $requestId 'ingress binding approve 8h request id'
+ Assert-Equal $bound.Approve $true 'ingress binding approve 8h switch'
+ Assert-Equal $bound.ExpiresInHours 8 'ingress binding approve 8h expiry'
+
+ $params=Get-OperatorControlParameters Ingress Deny $requestId $authz 0
+ $bound=(& $ingressMock @params | ConvertFrom-Json)
+ Assert-Equal $bound.RequestId $requestId 'ingress binding deny request id'
+ Assert-Equal $bound.Deny $true 'ingress binding deny switch'
+
+ $params=Get-OperatorControlParameters Ingress Revoke $grantId $authz 0
+ $bound=(& $ingressMock @params | ConvertFrom-Json)
+ Assert-Equal $bound.GrantId $grantId 'ingress binding revoke grant id'
+ Assert-Equal $bound.Revoke $true 'ingress binding revoke switch'
+
+ $params=Get-OperatorControlParameters Companion Approve $requestId $authz 8
+ $bound=(& $companionMock @params | ConvertFrom-Json)
+ Assert-Equal $bound.AuthzRoot $authz 'companion binding authz root'
+ Assert-Equal $bound.RequestId $requestId 'companion binding request id'
+ Assert-Equal $bound.Approve $true 'companion binding approve switch'
+ Assert-Equal $bound.ExpiresInHours 8 'companion binding expiry'
+ Write-Output 'CHECKPOINT: input, parameters, and script binding'
  $outside=Join-Path $base 'outside'
  New-Item -ItemType Directory -Path $outside | Out-Null
  $link=Join-Path $base 'linked-authz'

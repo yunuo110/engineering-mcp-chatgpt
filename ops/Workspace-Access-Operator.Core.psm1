@@ -142,16 +142,24 @@ function Resolve-OperatorExpiry([string]$Text) {
   default {throw 'EXPIRY_INVALID'}
  }
 }
-function Get-OperatorControlArguments([string]$Mode,[string]$Action,[string]$Id,[string]$AuthzRoot,[int]$ExpiresInHours=0) {
+function Get-OperatorControlParameters([string]$Mode,[string]$Action,[string]$Id,[string]$AuthzRoot,[int]$ExpiresInHours=0) {
  if($Mode -cnotin @('Companion','Ingress') -or $Action -cnotin @('Approve','Deny','Revoke')){throw 'ACTION_INVALID'}
  if($Action -ceq 'Revoke'){Assert-OperatorId $Id 'grant_'}else{Assert-OperatorId $Id 'req_'}
  if($ExpiresInHours -cnotin @(0,1,8,24) -or ($Action -cne 'Approve' -and $ExpiresInHours -ne 0)){throw 'EXPIRY_INVALID'}
- $args=@()
- if($Mode -ceq 'Companion'){$args+=@('-AuthzRoot',$AuthzRoot)}
- if($Action -ceq 'Revoke'){$args+=@('-GrantId',$Id,'-Revoke')}
- else {$args+=@('-RequestId',$Id,('-'+$Action))}
- if($ExpiresInHours){$args+=@('-ExpiresInHours',[string]$ExpiresInHours)}
- return ,$args
+ $parameters=@{}
+ if($Mode -ceq 'Companion'){$parameters['AuthzRoot']=$AuthzRoot}
+ if($Action -ceq 'Revoke'){
+  $parameters['GrantId']=$Id
+  $parameters['Revoke']=$true
+ } else {
+  $parameters['RequestId']=$Id
+  $parameters[$Action]=$true
+ }
+ if($ExpiresInHours){$parameters['ExpiresInHours']=$ExpiresInHours}
+ return $parameters
+}
+function Get-OperatorControlArguments([string]$Mode,[string]$Action,[string]$Id,[string]$AuthzRoot,[int]$ExpiresInHours=0) {
+ return (Get-OperatorControlParameters $Mode $Action $Id $AuthzRoot $ExpiresInHours)
 }
 function Get-OperatorNewRequests($Snapshot,[hashtable]$Seen) {
  $rows=@()
@@ -167,4 +175,4 @@ function Format-OperatorReason([string]$Value) {
  if($Value -match '(?i)(token|secret|password|bearer|authorization|api.key|eyJ[A-Za-z0-9_-]{12})'){return '[redacted]'}
  return Format-OperatorDisplayText $Value
 }
-Export-ModuleMember -Function Assert-OperatorPlainPath,Read-OperatorJson,Get-OperatorSnapshot,Resolve-OperatorSelection,Resolve-OperatorExpiry,Get-OperatorControlArguments,Get-OperatorNewRequests,Format-OperatorDisplayText,Format-OperatorReason
+Export-ModuleMember -Function Assert-OperatorPlainPath,Read-OperatorJson,Get-OperatorSnapshot,Resolve-OperatorSelection,Resolve-OperatorExpiry,Get-OperatorControlParameters,Get-OperatorControlArguments,Get-OperatorNewRequests,Format-OperatorDisplayText,Format-OperatorReason
