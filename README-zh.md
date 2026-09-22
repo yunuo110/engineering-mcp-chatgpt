@@ -104,6 +104,16 @@ powershell -NoProfile -File .\ops\Workspace-Access-Control.ps1 -AuthzRoot 'C:\Pr
 
 脚本要求人工输入完整确认文本。Deny、Revoke 使用同一脚本。它不会修改目标 workspace 的 NTFS ACL。
 
+本机待审批列表、有效授权列表及控制台提醒的启动方法见 [Operator Approval UX V1](docs/operator-approval-ux.md)。菜单保留现有的完整人工确认，并分别支持 companion 配置与 ingress 的 `Get-Constants` 边界。
+
+在管理员 PowerShell 启动 companion 菜单（配置文件必须与正在运行的 companion 相同）：
+
+```powershell
+powershell -NoProfile -File .\ops\Workspace-Access-Operator.ps1 -Mode Companion -ConfigPath 'C:\EngineeringMCPChatGPT\config\local.private.json'
+```
+
+在可读取授权目录的交互式用户会话中，把上述命令末尾加上 `-Watch` 即可启动只读控制台提醒。Ingress 安装使用 `-Mode Ingress -IngressOpsPath '<受管理员保护的 ingress ops 目录>'`；程序从该目录的 `Ingress.Common.psm1` 读取授权目录，并使用同目录现有控制脚本。监视模式不要求管理员权限；菜单审批要求管理员权限。
+
 ## Remote OAuth
 
 从 `config/oauth.example.json` 开始，并阅读 [Remote OAuth](docs/remote-oauth.md)。Node server 监听私有地址，由 HTTPS 反向代理发布 `https://mcp.example.com/mcp`。所有 provider 值均为通用示例；ZITADEL 只作为已测试的 reference provider 记录。
