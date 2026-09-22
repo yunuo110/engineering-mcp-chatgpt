@@ -29,6 +29,7 @@ try{
  $grant=[ordered]@{schema='engineering-workspace-grant/1';grant_id=$grantId;request_id=$requestId;status='GRANTED';canonical_root='F:\code\game-product';permissions=@('READ');granted_at=$date}
  Write-Json $requestPath $request
  $snapshot=Get-OperatorSnapshot $authz
+ Write-Output 'CHECKPOINT: pending discovery'
  Assert-Equal $snapshot.Requests.Count 1 'pending discovery count'
  Assert-Equal $snapshot.Requests[0].status 'REQUESTED' 'pending status'
  $seen=@{}
@@ -45,6 +46,7 @@ try{
  $grant.status='GRANTED';$grant.Remove('revoked_at');$grant.expires_at='2020-01-01T00:00:00.000Z'
  Write-Json $grantPath $grant
  Assert-Equal (Get-OperatorSnapshot $authz).Grants[0].status 'EXPIRED' 'expired classification'
+ Write-Output 'CHECKPOINT: lifecycle classification'
  [IO.File]::WriteAllText($requestPath,'{bad json')
  Assert-Throws {Get-OperatorSnapshot $authz | Out-Null} 'malformed JSON fails closed'
  Write-Json $requestPath $request
@@ -58,6 +60,7 @@ try{
  Write-Json $requestPath $request
  Assert-Equal (Format-OperatorReason 'api_key=abc123') '[redacted]' 'reason secret redaction'
  Assert-Equal (Format-OperatorReason "inspect`nsource") 'inspect?source' 'reason control character'
+ Write-Output 'CHECKPOINT: malformed and oversized records'
  Assert-Equal (Resolve-OperatorSelection '1' 1) 0 'selection first'
  foreach($text in @('0','2','-1','1;whoami','a','999999999999999999999999')){Assert-Throws {Resolve-OperatorSelection $text 1 | Out-Null} ('selection rejects '+$text)}
  Assert-Equal (Resolve-OperatorExpiry '1') 1 'expiry 1h'
@@ -73,6 +76,7 @@ try{
  Assert-Equal ((Get-OperatorControlArguments Ingress Revoke $grantId $authz) -join '|') ('-GrantId|'+$grantId+'|-Revoke') 'revoke fixed arguments'
  Assert-Throws {Get-OperatorControlArguments Companion Approve 'req_abc;whoami' $authz 0 | Out-Null} 'id injection rejected'
  Assert-Throws {Get-OperatorControlArguments Companion Deny $requestId $authz 8 | Out-Null} 'deny expiry rejected'
+ Write-Output 'CHECKPOINT: input and arguments'
  $outside=Join-Path $base 'outside'
  New-Item -ItemType Directory -Path $outside | Out-Null
  $link=Join-Path $base 'linked-authz'
